@@ -54,8 +54,10 @@ class ModelInput(BaseModel):
         return v
 
     @classmethod
-    def __modify_schema__(cls, field_schema):
-        field_schema.update(type="number")
+    def __get_pydantic_json_schema__(cls, *, by_alias: bool = True) -> dict:
+        field_schema = super().__get_pydantic_json_schema__(by_alias=by_alias)
+        field_schema["type"] = "number"
+        return field_schema
 
 model = pickle.load(open(VARIABLES.model_filename, "rb"))
 
