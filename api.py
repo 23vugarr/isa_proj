@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Schema
 import pandas as pd
 import pickle
 from dataclasses import dataclass
@@ -40,11 +40,35 @@ class ModelInput(BaseModel):
     Outstanding_Debt: Optional[float64] = None
     Credit_Utilization_Ratio: Optional[float64] = None
     Credit_History_Age: Optional[float64] = None
-    Payment_of_Min_Amount:Optional[object]=None
+    Payment_of_Min_Amount: Optional[object] = None
     Total_EMI_per_month: Optional[float64] = None
     Amount_invested_monthly: Optional[float64] = None
     Monthly_Balance: Optional[float64] = None
 
+    def __get_pydantic_core_schema__(self):
+        schema = {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "title": "ModelInput",
+            "type": "object",
+            "properties": {},
+            "required": [],
+        }
+
+        for field_name, field in self.__fields__.items():
+            field_schema = {"type": field.type_.__name__}
+
+            if field.default is not None:
+                field_schema["default"] = field.default
+
+            if field.field_info.extra.get("description"):
+                field_schema["description"] = field.field_info.extra["description"]
+
+            if field.required:
+                schema["required"].append(field_name)
+
+            schema["properties"][field_name] = field_schema
+
+        return schema
 
 
 model = pickle.load(open(VARIABLES.model_filename, "rb"))
@@ -52,22 +76,21 @@ model = pickle.load(open(VARIABLES.model_filename, "rb"))
 
 def preprocess(data: pd.DataFrame) -> pd.DataFrame:
     original_data = pd.read_excel(VARIABLES.model_input)
-    original_data = original_data.drop(columns = ['ID', 'Type_of_Loan', 'Payment_Behaviour', 'Age','SSN','Customer_ID', 'Occupation','Name', 'Month', 'Credit_Score'], axis = 1)
-    data = pd.concat([original_data, data], axis = 0)
-    data = data.reset_index(drop = True)
-    
-    data = pd.get_dummies(data, columns=['Payment_of_Min_Amount'], drop_first = True)
+    original_data = original_data.drop(columns=['ID', 'Type_of_Loan', 'Payment_Behaviour', 'Age', 'SSN', 'Customer_ID',
+                                                'Occupation', 'Name', 'Month', 'Credit_Score'], axis=1)
+    data = pd.concat([original_data, data], axis=0)
+    data = data.reset_index(drop=True)
+
+    data = pd.get_dummies(data, columns=['Payment_of_Min_Amount'], drop_first=True)
     le = LabelEncoder()
     data['Credit_Mix'] = le.fit_transform(data.Credit_Mix)
-
 
     col = data.columns
     scaler = MinMaxScaler()
     data = scaler.fit_transform(data)
-    data = pd.DataFrame(data, columns = col)
-    print(data)
+    data = pd.DataFrame(data, columns=col)
 
-    return data.iloc[-1,:].values.reshape(1,-1)
+    return data.iloc[-1, :].values.reshape(1, -1)
 
 
 @app.get("/predict")
