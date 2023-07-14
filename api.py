@@ -1,11 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 import pandas as pd
 import pickle
 from dataclasses import dataclass
 from typing import Optional
-from numpy import float64
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 import json
 
@@ -26,36 +25,24 @@ class VARIABLES:
 
 
 class ModelInput(BaseModel):
-    Annual_Income: Optional[float64] = Field(None, alias="Annual_Income")
-    Monthly_Inhand_Salary: Optional[float64] = Field(None, alias="Monthly_Inhand_Salary")
-    Num_Bank_Accounts: Optional[float64] = Field(None, alias="Num_Bank_Accounts")
-    Num_Credit_Card: Optional[float64] = Field(None, alias="Num_Credit_Card")
-    Interest_Rate: Optional[float64] = Field(None, alias="Interest_Rate")
-    Num_of_Loan: Optional[float64] = Field(None, alias="Num_of_Loan")
-    Delay_from_due_date: Optional[float64] = Field(None, alias="Delay_from_due_date")
-    Num_of_Delayed_Payment: Optional[float64] = Field(None, alias="Num_of_Delayed_Payment")
-    Changed_Credit_Limit: Optional[float64] = Field(None, alias="Changed_Credit_Limit")
-    Num_Credit_Inquiries: Optional[float64] = Field(None, alias="Num_Credit_Inquiries")
-    Credit_Mix: Optional[object] = Field(None, alias="Credit_Mix")
-    Outstanding_Debt: Optional[float64] = Field(None, alias="Outstanding_Debt")
-    Credit_Utilization_Ratio: Optional[float64] = Field(None, alias="Credit_Utilization_Ratio")
-    Credit_History_Age: Optional[float64] = Field(None, alias="Credit_History_Age")
-    Payment_of_Min_Amount: Optional[object] = Field(None, alias="Payment_of_Min_Amount")
-    Total_EMI_per_month: Optional[float64] = Field(None, alias="Total_EMI_per_month")
-    Amount_invested_monthly: Optional[float64] = Field(None, alias="Amount_invested_monthly")
-    Monthly_Balance: Optional[float64] = Field(None, alias="Monthly_Balance")
-
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v):
-        return v
-
-    @classmethod
-    def __modify_schema__(cls, field_schema):
-        field_schema.update(type="number")
+    Annual_Income: Optional[float] = None
+    Monthly_Inhand_Salary: Optional[float] = None
+    Num_Bank_Accounts: Optional[float] = None
+    Num_Credit_Card: Optional[float] = None
+    Interest_Rate: Optional[float] = None
+    Num_of_Loan: Optional[float] = None
+    Delay_from_due_date: Optional[float] = None
+    Num_of_Delayed_Payment: Optional[float] = None
+    Changed_Credit_Limit: Optional[float] = None
+    Num_Credit_Inquiries: Optional[float] = None
+    Credit_Mix: Optional[object] = None
+    Outstanding_Debt: Optional[float] = None
+    Credit_Utilization_Ratio: Optional[float] = None
+    Credit_History_Age: Optional[float] = None
+    Payment_of_Min_Amount: Optional[object] = None
+    Total_EMI_per_month: Optional[float] = None
+    Amount_invested_monthly: Optional[float] = None
+    Monthly_Balance: Optional[float] = None
 
 model = pickle.load(open(VARIABLES.model_filename, "rb"))
 
